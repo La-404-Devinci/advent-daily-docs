@@ -1,0 +1,420 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "API Advent Calendar",
+    "version": "1.0.0",
+    "description": "API documentation for the Advent Calendar project."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Endpoints for managing users"
+    },
+    {
+      "name": "Auth",
+      "description": "Endpoints for managing authentication"
+    },
+    {
+      "name": "Leaderboard",
+      "description": "Endpoints for managing the leaderboard"
+    },
+    {
+      "name": "Daily",
+      "description": "Endpoints for managing the daily club"
+    },
+    {
+      "name": "Club",
+      "description": "Get the clubs"
+    },
+    {
+      "name": "Granter",
+      "description": "Endpoints for managing the clubs (require admin tag)"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "Login the user",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "summary": "Get my id",
+        "tags": ["Auth"],
+        "responses": {
+          "200": {
+            "description": "My ID retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/me/qr": {
+      "get": {
+        "summary": "Get my QR code",
+        "tags": ["Auth"],
+        "responses": {
+          "200": {
+            "description": "QR code retrieved successfully",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "base64"
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "summary": "Get user profile",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": { 
+            "description": "User profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            } 
+          },
+          "404": { "description": "User not found" }
+        }
+      },
+      "put": {
+        "summary": "Edit user profile",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            } 
+        },
+        "responses": {
+          "200": { "description": "User profile updated successfully" },
+          "404": { "description": "User not found" }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "summary": "Create user (signup)",
+        "tags": ["Users"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User created successfully" },
+          "400": { "description": "Invalid input" }
+        }
+      }
+    },
+    "/daily": {
+      "get": {
+        "summary": "Get daily club",
+        "tags": ["Daily"],
+        "responses": {
+          "200": { 
+            "description": "Daily club data retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/clubs"
+                }
+              }
+            } 
+          }
+        }
+      }
+    },
+    "/daily/challenges": {
+      "get": {
+        "summary": "Get daily challenges",
+        "tags": ["Daily"],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": { 
+            "description": "Daily challenges retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/challenges"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/leaderboard": {
+      "get": {
+        "summary": "Get a sorted list of users from points",
+        "tags": ["Leaderboard"],
+        "responses": {
+          "200": { 
+            "description": "Leaderboard retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uuid": { "type": "string" },
+                      "score": { "type": "integer" },
+                      "rank": { "type": "integer" }
+                    }
+                  }
+                }
+              }
+            } 
+          }
+        }
+      }
+    },
+    "/leaderboard/me": {
+      "get": {
+        "summary": "Get my score and rank",
+        "tags": ["Leaderboard"],
+        "responses": {
+          "200": { 
+            "description": "My score and rank retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": { "type": "string" },
+                    "score": { "type": "integer" },
+                    "rank": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/grant": {
+      "post": {
+        "summary": "Grant challenge to user",
+        "tags": ["Granter"],
+        "security": [{ "clubAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "string" },
+                  "challengeId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Challenge granted successfully" },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/clubs": {
+      "get": {
+        "summary": "Get all clubs",
+        "tags": ["Club"],
+        "security": [{ "adminAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of all clubs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/clubs"
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Forbidden" }
+        }
+      }
+    },
+    "/clubs/{id}" : {
+      "get": {
+        "summary": "Get club by id",
+        "tags": ["Club"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Club retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/clubs"
+                }
+              }
+            }
+          },
+          "404": { "description": "Club not found" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "clubAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "adminAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "API_SECRET"
+      }
+    },
+    "schemas": {
+      "user": {
+        "type": "object",
+        "required": ["id", "email"],
+        "properties": {
+          "id": { "type": "string" },
+          "username": { "type": "string" },
+          "email": { "type": "string" },
+          "quote": { "type": "string" }
+        }
+      },
+      "challenges": {
+        "type": "object",
+        "required": ["id", "title", "points"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "club_id": { "type": "string" },
+          "score": { "type": "integer" }
+        }
+      },
+      "clubs": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "avatar_url": { "type": "string" },
+          "daily_date": { "type": "string" }
+        }
+      }
+    }
+  }
+}
