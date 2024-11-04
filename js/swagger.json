@@ -286,30 +286,6 @@
                 }
             }
         },
-        "/leaderboard/me": {
-            "get": {
-                "summary": "Get my score and rank",
-                "tags": ["Leaderboard"],
-                "responses": {
-                    "200": {
-                        "description": "My score and rank retrieved successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "uuid": { "type": "string" },
-                                        "score": { "type": "integer" },
-                                        "rank": { "type": "integer" }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "401": { "description": "Unauthorized" }
-                }
-            }
-        },
         "/grant": {
             "post": {
                 "summary": "Grant challenge to user",
